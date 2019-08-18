@@ -48,9 +48,7 @@ function makeResponsive() {
         d3.max(csvData, d => d[chosenXAxis]) * 1.15
       ])
       .range([0, width]);
-
     return xLinearScale;
-
   }
 // function used for updating y-scale var upon click on axis label
   function yScale(csvData, chosenYAxis) {
@@ -60,12 +58,10 @@ function makeResponsive() {
         d3.max(csvData, d => d[chosenYAxis]) * 1.15
       ])
       .range([height, 0]);
-
     return yLinearScale;
-
   }
 
-// function used for updating xAxis var upon click on axis label
+  // function used for updating xAxis var upon click on axis label
   function renderXAxes(newXScale, xAxis) {
     var bottomAxis = d3.axisBottom(newXScale);
   
@@ -74,7 +70,8 @@ function makeResponsive() {
       .call(bottomAxis);
     return xAxis;
   }
-      
+  
+  // function used for updating yAxis var upon click on axis label
   function renderYAxes(newYScale, yAxis){
     var leftAxis = d3.axisLeft(newYScale, yAxis)
     
@@ -86,21 +83,34 @@ function makeResponsive() {
 
   // function used for updating circles group with a x transition to new circles
   function renderXCircles(circlesGroup, newXScale, chosenXAxis) {
-
     circlesGroup.transition()
       .duration(1000)
       .attr("cx", d => newXScale(d[chosenXAxis]));
-
     return circlesGroup;
   }
+
   // function used for updating circles group with a y transition to new circles
   function renderYCircles(circlesGroup, newYScale, chosenYAxis) {
-
     circlesGroup.transition()
       .duration(1000)
       .attr("cy", d => newYScale(d[chosenYAxis]));
-
     return circlesGroup;
+  }
+
+  // function used for updating circles labels with a xtransition to new circles
+  function renderXLabel (circlesLabels, newXScale, chosenXAxis){
+    circlesLabels.transition()
+      .duration(1000)
+      .attr("x", d => newXScale(d[chosenXAxis]));
+    return circlesLabels;
+  }
+
+  // function used for updating circles labels with a y transition to new circles
+  function renderYLabel (circlesLabels, newYScale, chosenYAxis){
+    circlesLabels.transition()
+      .duration(1000)
+      .attr("y", d => newYScale(d[chosenYAxis]));
+    return circlesLabels
   }
 
   // function used for updating circles group with new tooltip
@@ -188,11 +198,11 @@ function makeResponsive() {
       .append("circle")
       .classed("stateCircle", true)
       .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      .attr("cy", d => yLinearScale(d[chosenYAxis])*0.98)
+      .attr("cy", d => yLinearScale(d[chosenYAxis]))
       .attr("r", 20)
       .attr("opacity", ".8")
       
-    var circleLabels = chartGroup.selectAll(null)
+    var circlesLabels = chartGroup.selectAll(null)
       .data(csvData)
       .enter()
       .append("text")
@@ -200,20 +210,6 @@ function makeResponsive() {
       .classed("stateText", true)
       .attr("x", d => xLinearScale(d[chosenXAxis]))
       .attr("y", d => yLinearScale(d[chosenYAxis]));
-
-    // // append state abbr
-    // var circleText = chartGroup.selectAll("text")
-    //   .data(csvData)
-    //   .enter()
-    //   .append("text")
-    //   .text(function(d){return d.abbr;})
-    //   .classed("stateText", true)
-    //   .attr("x", function (d) {return xLinearScale(d[chosenXAxis])})
-    //   .attr("y", function (d) {return yLinearScale(d[chosenYAxis])});
-    
-    // var circlesGroup =  circlesGroup.selectAll("g.dot")
-    //   .data(csvData)
-    //   .enter().append('g');
     
     // Create group for  3 x-axis labels
     var xlabelsGroup = chartGroup.append("g")
@@ -278,8 +274,6 @@ function makeResponsive() {
           // replaces chosenXAxis with value
           chosenXAxis = value;
 
-          // console.log(chosenXAxis)
-
           // functions here found above csv import
           // updates x scale for new data
           xLinearScale = xScale(csvData, chosenXAxis);
@@ -292,6 +286,8 @@ function makeResponsive() {
 
           // updates tooltips with new info
           circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
+
+          circlesLabels = renderXLabel(circlesLabels, xLinearScale, chosenXAxis);
 
           // changes classes to change bold text
           if (chosenXAxis === "age") {
@@ -329,6 +325,8 @@ function makeResponsive() {
           }
         }
       });
+    
+    // y axis labels event listener
     ylabelsGroup.selectAll("text")
       .on("click", function() {
         // get value of selection
@@ -336,7 +334,7 @@ function makeResponsive() {
 
         if (value !== chosenYAxis) {
 
-          // replaces chosenXAxis with value
+          // replaces chosenYAxis with value
           chosenYAxis = value;
 
           // functions here found above csv import
@@ -351,6 +349,8 @@ function makeResponsive() {
 
           // updates tooltips with new info
           circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
+
+          circlesLabels = renderYLabel(circlesLabels, yLinearScale, chosenYAxis);
 
           // changes classes to change bold text
           if (chosenYAxis === "smokes") {
